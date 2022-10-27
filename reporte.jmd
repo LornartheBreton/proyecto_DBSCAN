@@ -1,0 +1,45 @@
+---
+title: "Reporte experimental - DBSCAN y Opem MP"
+author: "Héctor G. T. Torres - 191589"
+date: 17 de octubre, 2022
+---
+
+## Resultados
+A continuación, se muestran las gráficas con los tiempos de ejecución de cada permutación de número de hilos 
+y cantidad de puntos. Cada gráfica se representa en formato de `número de puntos_número de hilos`. 
+Por ejemplo, la barra que corresponde a la permutación de $20000$ puntos y $8$ hilos es la `20000_8`. Las 
+gráficas fueron generadas con `Julia` y los Paquetes `Plots.jl`, `CSV.jl`, `DataFrames.jl` y `Weave.jl` para exportar a 
+un archivo PDF.  
+
+Primero, importaremos los datos.
+
+```julia; results = "markup"
+using DataFrames
+using CSV
+
+df = DataFrame(CSV.File("experiment_results.csv"))
+```
+
+A continuación, generaremos la gráfica.
+```julia
+using Plots
+bar(
+    df.Combinacion,
+    df.Milisegundos,
+    labels = df.Combinacion,
+    legend = false,
+    xlabel = "Combinación",
+    ylabel = "Tiempo de Ejecución (Milisegundos)",
+    title = "Tiempo de ejecución",
+)
+```
+Como se puede ver en las gráficas, la mejora que representa la paralelización presenta 
+rendimientos decrecientes: la mejora en rendimiento obtenida de pasar de $1$ a $8$ hilos es menor en porcentaje 
+que la obtenida al pasar de $8$ a $16$ hilos. Esto se vuelve aparente al ver la diferentcia entre usar $1$ y $8$ hilos. En esos casos, la paralelización hizo que el algoritmo se ejecutara entre $6.5$ y $7.0$ veces más ráoido. 
+
+Aunado a esto, se puede observar que no hay mejora significativa al pasar de $16$ (el máximo de hilos) 
+a $32$ hilos (el doble del máximo), de hecho hasta emperora un poco. Probablemente esto se debe a que la librería `omp.h` toma como valor predeterminado el número de hilos máximo si se ingresa un número mayor a este.  
+
+En cuanto al número de puntos, se puede observar que se mantuvo una proporción de mejora similar entre 
+los números de puntos en cada conjunto de datos. Es decir, sin importar el número de puntos en el _dataset_, 
+la implementación del algoritmo mejoraba en proporciones similares conforme aumentaba el número de hilos.
